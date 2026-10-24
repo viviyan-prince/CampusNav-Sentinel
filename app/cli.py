@@ -68,6 +68,10 @@ def main() -> int:
     print(f"  Agent Steps:       {m['agent_steps']}")
     print(f"  Simulated Stops:   {m['simulated_stops']}")
     print(f"  Human Reviews:     {m['human_reviews']}")
+    print(f"  Nebius AI Calls:   {m['nebius_calls']}")
+    print(f"  Nebius Successes:  {m['nebius_successes']}")
+    if m.get('nebius_model'):
+        print(f"  Nebius Model:      {m['nebius_model']}")
     print(f"  Output:            {report['output']}")
     print("=" * 60)
 
@@ -75,6 +79,14 @@ def main() -> int:
         print("\n  EVENT TIMELINE (last 10):")
         for ev in report["timeline"][-10:]:
             print(f"    [{ev['frame']:>5}] {ev['time_ms']:>8.0f}ms  {ev['type']:<15} {ev['description'][:60]}")
+
+    if report.get("nebius_analyses"):
+        print("\n  NEBIUS AI ANALYSES:")
+        for na in report["nebius_analyses"]:
+            print(f"    [Frame {na['frame']:>3}] Scene: {na['scene'][:50]}")
+            print(f"                Risk: {na['risk']}")
+            print(f"                Action: {na['action'][:55]}")
+            print()
 
     print(f"\n  Full report: {Path(args.output) / 'report.json'}")
     return 0

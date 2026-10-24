@@ -27,6 +27,10 @@ class Config:
     aws_s3_bucket: str = ""
     aws_enabled: bool = False
     log_level: str = "INFO"
+    nebius_api_key: str = ""
+    nebius_model: str = "meta-llama/Llama-3.3-70B-Instruct"
+    nebius_enabled: bool = True
+    nebius_interval: int = 5  # Analyze every Nth processed frame
 
     @classmethod
     def from_env(cls) -> Config:
@@ -45,4 +49,8 @@ class Config:
         cfg.aws_s3_bucket = os.getenv("CN_S3_BUCKET", cfg.aws_s3_bucket)
         cfg.aws_enabled = os.getenv("CN_AWS_ENABLED", "false").lower() == "true"
         cfg.log_level = os.getenv("CN_LOG_LEVEL", cfg.log_level)
+        cfg.nebius_api_key = os.getenv("NEBIUS_API_KEY", cfg.nebius_api_key)
+        cfg.nebius_model = os.getenv("NEBIUS_MODEL", cfg.nebius_model)
+        cfg.nebius_enabled = os.getenv("NEBIUS_ENABLED", "true").lower() == "true"
+        cfg.nebius_interval = int(os.getenv("NEBIUS_INTERVAL", cfg.nebius_interval))
         return cfg

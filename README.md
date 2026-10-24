@@ -1,18 +1,20 @@
 # CampusNav Sentinel — Agentic Visual Hazard Analysis
 
-**OpenCV AI Competition 2026** | Powered by AWS | Agentic Vision Track
+**Nebius × NVIDIA Hackathon 2026** | Powered by Nebius AI Cloud
 
-CampusNav Sentinel is a camera-only visual intelligence system that analyzes recorded or simulated campus-shuttle footage, detects pedestrians and vehicles using YOLOv8, tracks hazard candidates across frames, and drives a deterministic agentic feedback loop that selects its next action based on observed visual evidence. Every decision is recorded in an inspectable trace so judges can verify that the agent's behavior genuinely changes in response to what it sees.
+CampusNav Sentinel is a camera-only visual intelligence system that analyzes campus-shuttle footage using YOLOv8 detection and **Nebius AI Cloud** (NVIDIA models) for advanced scene analysis. It detects pedestrians and vehicles, drives a deterministic agentic feedback loop, and leverages **NVIDIA-powered language models** through Nebius to provide contextual risk assessments and actionable safety recommendations.
 
 ## Features
 
 - **OpenCV 5.0.0** — Frame decoding, CLAHE enhancement, color-space conversion, Canny edge detection, ROI masking, morphological operations, background subtraction
 - **YOLOv8n Object Detection** — GPU-accelerated pedestrian, vehicle, and obstacle detection via ultralytics
-- **Agentic Feedback Loop** — Deterministic state machine with 8 explicit actions (ANALYZE_FRAME, INSPECT_REGION, COMPARE_NEXT_FRAME, VERIFY_PERSISTENCE, REQUEST_SIMULATED_STOP, REQUEST_HUMAN_REVIEW, CONTINUE_MONITORING, REPORT_FAILURE) and 7 hazard states
+- **Nebius AI Cloud Integration** ⭐ — Real-time scene analysis using NVIDIA models (meta-llama/Llama-3.3-70B-Instruct) for contextual safety assessment and recommendations
+- **Agentic Feedback Loop** — Deterministic state machine with 8 explicit actions and 7 hazard states
 - **Evidence-Driven Decisions** — Detection outputs determine the next tool call; subsequent frames can confirm, escalate, or clear a hazard
+- **AI-Powered Risk Assessment** ⭐ — Nebius analyzes detected objects and scene context to provide risk levels and actionable recommendations
 - **Full Decision Trace** — Every agent step records action, reason, evidence, state before/after, and timestamp
-- **Annotated Output** — Bounding boxes, hazard state overlay, ROI line, motion regions, and HUD on every frame
-- **Structured Reports** — JSON report with metrics, event timeline, agent trace, and frame summary
+- **Annotated Output** — Bounding boxes, hazard state overlay, Nebius AI analysis overlay, ROI line, motion regions, and HUD on every frame
+- **Structured Reports** — JSON report with metrics, event timeline, agent trace, frame summary, and AI analyses
 - **FastAPI Web Interface** — Upload video/image, view annotated output, inspect metrics and agent trace
 - **Failure Handling** — Corrupt frames, missing models, low confidence, degraded perception, and empty scenes handled gracefully
 
@@ -62,6 +64,23 @@ Verify OpenCV 5:
 python -c "import cv2; print(cv2.__version__)"
 # Expected: 5.0.0
 ```
+
+### Configure Nebius AI (Optional but Recommended)
+
+Set your Nebius API key to enable AI-powered scene analysis:
+
+```bash
+export NEBIUS_API_KEY=your_nebius_api_key_here
+```
+
+Or create a `.env` file:
+
+```bash
+cp .env.example .env
+# Edit .env and add your NEBIUS_API_KEY
+```
+
+**Without a Nebius API key**, the system works normally with OpenCV + YOLO detection only. See [NEBIUS_INTEGRATION.md](NEBIUS_INTEGRATION.md) for details.
 
 ### Generate Test Video
 
@@ -120,6 +139,10 @@ All settings can be overridden via environment variables:
 | `CN_AWS_ENABLED` | false | Enable AWS integration |
 | `CN_S3_BUCKET` | — | S3 bucket for artifacts |
 | `CN_LOG_LEVEL` | INFO | Logging level |
+| `NEBIUS_API_KEY` | — | Nebius AI Cloud API key |
+| `NEBIUS_MODEL` | meta-llama/Llama-3.3-70B-Instruct | NVIDIA model for scene analysis |
+| `NEBIUS_ENABLED` | true | Enable/disable Nebius AI integration |
+| `NEBIUS_INTERVAL` | 5 | Analyze every Nth processed frame |
 
 ## Verified Environment
 
