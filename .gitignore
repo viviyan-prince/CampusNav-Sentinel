@@ -18,8 +18,10 @@ venv/
 runs/
 data/input/*
 data/output/*
+data/uploads/*
 !data/input/.gitkeep
 !data/output/.gitkeep
+!data/uploads/.gitkeep
 !data/README.md
 .claude/
 *.mp4

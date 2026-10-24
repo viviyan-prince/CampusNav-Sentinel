@@ -1,8 +1,10 @@
-# CampusNav Sentinel — Agentic Visual Hazard Analysis
+# CampusNav Sentinel — AI-Powered Visual Hazard Analysis
 
-**Nebius × NVIDIA Hackathon 2026** | Powered by Nebius AI Cloud
+**🏆 Nebius × NVIDIA Global AI Hackathon 2026 Submission**
 
-CampusNav Sentinel is a camera-only visual intelligence system that analyzes campus-shuttle footage using YOLOv8 detection and **Nebius AI Cloud** (NVIDIA models) for advanced scene analysis. It detects pedestrians and vehicles, drives a deterministic agentic feedback loop, and leverages **NVIDIA-powered language models** through Nebius to provide contextual risk assessments and actionable safety recommendations.
+CampusNav Sentinel is a camera-only visual intelligence system that combines computer vision (OpenCV 5.0 + YOLOv8) with **Nebius AI Cloud** to provide real-time hazard detection and contextual risk assessment. The system leverages **NVIDIA-powered language models** (meta-llama/Llama-3.3-70B-Instruct) through Nebius to transform raw object detections into actionable safety insights for autonomous shuttle operations.
+
+**🌟 Key Innovation**: Hybrid intelligence combining fast CV detection with deep language model reasoning for contextual safety analysis.
 
 ## Features
 
@@ -43,7 +45,32 @@ Input Video/Image
   [FastAPI Server] ── Web UI + REST API
 ```
 
-## Quick Start
+## 🚀 Quick Start for Hackathon Judges
+
+**Prerequisites**: Python 3.10+, pip, NVIDIA GPU with CUDA (optional)
+
+**30-Second Demo:**
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Set your Nebius API key
+export NEBIUS_API_KEY=your_nebius_api_key_here
+
+# 3. Run verification
+PYTHONPATH=. python verify_nebius.py
+
+# 4. Process sample video
+PYTHONPATH=. python app/cli.py data/sample/test_campus.mp4 -o data/output --max-frames 30
+
+# 5. View results
+# - Video: data/output/annotated_output.mp4
+# - Report: data/output/report.json
+```
+
+**Without Nebius API key**: System works in fallback mode (OpenCV + YOLO detection only). Set `NEBIUS_API_KEY` to enable AI scene analysis.
+
+## Full Installation Guide
 
 ### Prerequisites
 
