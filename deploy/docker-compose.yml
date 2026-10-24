@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  campusnav:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - CN_API_HOST=0.0.0.0
+      - CN_API_PORT=8000
+      - CN_TARGET_WIDTH=640
+      - CN_ROI_FRACTION=0.6
+      - CN_DETECTOR_MODEL=yolov8n.pt
+      - CN_DETECTOR_CONFIDENCE=0.35
+      - CN_MOTION_THRESHOLD=0.02
+      - CN_LOG_LEVEL=INFO
+      - CN_AWS_ENABLED=${CN_AWS_ENABLED:-false}
+      - CN_S3_BUCKET=${CN_S3_BUCKET:-}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+    volumes:
+      - campusnav-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  campusnav-data:

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusNav Sentinel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;display:flex;align-items:center;gap:16px}
+.header h1{font-size:20px;font-weight:600;color:#f0f6fc}
+.header .badge{background:#238636;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
+.card h3{font-size:14px;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+.upload-zone{border:2px dashed #30363d;border-radius:8px;padding:40px;text-align:center;cursor:pointer;transition:border-color 0.2s}
+.upload-zone:hover{border-color:#58a6ff}
+.upload-zone input{display:none}
+.btn{background:#238636;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}
+.btn:hover{background:#2ea043}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.status{padding:8px 12px;border-radius:6px;font-size:13px;margin:8px 0}
+.status.clear{background:#0d1117;border:1px solid #238636;color:#3fb950}
+.status.hazard{background:#1c0d0d;border:1px solid #da3633;color:#f85149}
+.status.warning{background:#1c1500;border:1px solid #d29922;color:#e3b341}
+.status.info{background:#0c1929;border:1px solid #1f6feb;color:#58a6ff}
+.metric{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:13px}
+.metric .val{color:#f0f6fc;font-weight:600;font-variant-numeric:tabular-nums}
+.timeline{max-height:300px;overflow-y:auto;font-size:12px;font-family:'Cascadia Code',monospace}
+.timeline .ev{padding:4px 0;border-bottom:1px solid #21262d}
+.timeline .ev .t{color:#8b949e;width:80px;display:inline-block}
+.trace{max-height:300px;overflow-y:auto;font-size:12px;font-family:'Cascadia Code',monospace}
+.trace .step{padding:4px 0;border-bottom:1px solid #21262d}
+.trace .action{color:#d2a8ff;font-weight:600}
+.trace .state{color:#7ee787}
+#output-video,#output-image{max-width:100%;border-radius:6px;margin-top:8px}
+.spinner{display:none;width:20px;height:20px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.show{display:block!important}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>CampusNav Sentinel</h1>
+  <span class="badge">OpenCV {{ opencv_version }}</span>
+  <span class="badge" style="background:#1f6feb">Agentic Vision</span>
+</div>
+<div class="container">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h3>Input</h3>
+        <div class="upload-zone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <p style="font-size:16px;margin-bottom:8px">Drop video or image here</p>
+          <p style="color:#8b949e;font-size:13px">MP4, AVI, MOV, JPG, PNG (max 100MB)</p>
+          <input type="file" id="fileInput" accept="video/*,image/*">
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="analyzeBtn" onclick="analyze()" disabled>Analyze</button>
+          <div class="spinner" id="spinner"></div>
+          <span id="statusText" style="font-size:13px;color:#8b949e"></span>
+        </div>
+        <div id="filename" style="margin-top:8px;font-size:13px;color:#58a6ff"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Agent Trace</h3>
+        <div class="trace" id="tracePanel"><p style="color:#8b949e">Run analysis to see agent decisions</p></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Output</h3>
+        <div id="outputPanel"><p style="color:#8b949e">Results will appear here</p></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Metrics</h3>
+        <div id="metricsPanel"><p style="color:#8b949e">No data yet</p></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Event Timeline</h3>
+        <div class="timeline" id="timelinePanel"><p style="color:#8b949e">No events yet</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let selectedFile=null;
+const fi=document.getElementById('fileInput');
+fi.addEventListener('change',e=>{selectedFile=e.target.files[0];if(selectedFile){document.getElementById('filename').textContent=selectedFile.name;document.getElementById('analyzeBtn').disabled=false}});
+const dz=document.getElementById('dropzone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='#58a6ff'});
+dz.addEventListener('dragleave',()=>{dz.style.borderColor='#30363d'});
+dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='#30363d';selectedFile=e.dataTransfer.files[0];if(selectedFile){document.getElementById('filename').textContent=selectedFile.name;document.getElementById('analyzeBtn').disabled=false}});
+
+async function analyze(){
+  if(!selectedFile)return;
+  const btn=document.getElementById('analyzeBtn');
+  const spin=document.getElementById('spinner');
+  const st=document.getElementById('statusText');
+  btn.disabled=true;spin.classList.add('show');st.textContent='Processing...';
+  const fd=new FormData();fd.append('file',selectedFile);
+  try{
+    const r=await fetch('/analyze',{method:'POST',body:fd});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Failed');
+    renderResults(d);st.textContent='Complete';
+  }catch(e){st.textContent='Error: '+e.message;document.getElementById('outputPanel').innerHTML='<div class="status hazard">'+e.message+'</div>'}
+  finally{spin.classList.remove('show');btn.disabled=false}
+}
+
+function renderResults(d){
+  const r=d.report;const m=r.metrics;
+  let stClass='clear',stLabel='CLEAR';
+  if(m.simulated_stops>0){stClass='hazard';stLabel='HAZARD — SIMULATED STOP ISSUED'}
+  else if(m.peak_hazard_score>0.5){stClass='warning';stLabel='WARNING — HAZARDS DETECTED'}
+  else if(m.total_hazards>0){stClass='info';stLabel='CANDIDATES DETECTED'}
+
+  let op=`<div class="status ${stClass}">${stLabel} (peak score: ${m.peak_hazard_score.toFixed(3)})</div>`;
+  if(d.job_id){
+    const ext=r.output.endsWith('.mp4')?'video':'image';
+    if(ext==='video')op+=`<video id="output-video" controls src="/results/${d.job_id}/output"></video>`;
+    else op+=`<img id="output-image" src="/results/${d.job_id}/output">`;
+    op+=`<div style="margin-top:8px"><a href="/results/${d.job_id}" target="_blank" style="color:#58a6ff;font-size:13px">View full JSON report</a></div>`;
+  }
+  document.getElementById('outputPanel').innerHTML=op;
+
+  let mh='';
+  const pairs=[['OpenCV',m.opencv_version],['Frames',`${m.processed_frames}/${m.total_frames}`],['Failed',m.failed_frames],['Time',m.total_time_s.toFixed(1)+'s'],['FPS',m.avg_fps.toFixed(1)],['Avg Inference',m.avg_inference_ms.toFixed(1)+'ms'],['Detections',m.total_detections],['Hazards',m.total_hazards],['Persons',m.total_persons],['Vehicles',m.total_vehicles],['Agent Steps',m.agent_steps],['Sim. Stops',m.simulated_stops],['Human Reviews',m.human_reviews]];
+  pairs.forEach(([k,v])=>{mh+=`<div class="metric"><span>${k}</span><span class="val">${v}</span></div>`});
+  document.getElementById('metricsPanel').innerHTML=mh;
+
+  let th='';
+  (r.timeline||[]).forEach(ev=>{th+=`<div class="ev"><span class="t">${ev.time_ms.toFixed(0)}ms</span> <strong>${ev.type}</strong> ${ev.description.substring(0,80)}</div>`});
+  document.getElementById('timelinePanel').innerHTML=th||'<p style="color:#8b949e">No events</p>';
+
+  let tr='';
+  ((r.agent_trace||{}).steps||[]).forEach(s=>{tr+=`<div class="step"><span class="action">${s.action}</span> <span class="state">[${s.state_before}→${s.state_after}]</span><br>${s.reason.substring(0,100)}</div>`});
+  document.getElementById('tracePanel').innerHTML=tr||'<p style="color:#8b949e">No trace</p>';
+}
+</script>
+</body>
+</html>
