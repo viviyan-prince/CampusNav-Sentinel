@@ -54,16 +54,19 @@ Input Video/Image
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Set your Nebius API key
+# 2. Generate test video (not included in repo)
+python scripts/generate_test_video.py --output data/sample/test_campus.mp4 --duration 10
+
+# 3. Set your Nebius API key
 export NEBIUS_API_KEY=your_nebius_api_key_here
 
-# 3. Run verification
+# 4. Run verification
 PYTHONPATH=. python verify_nebius.py
 
-# 4. Process sample video
+# 5. Process sample video
 PYTHONPATH=. python app/cli.py data/sample/test_campus.mp4 -o data/output --max-frames 30
 
-# 5. View results
+# 6. View results
 # - Video: data/output/annotated_output.mp4
 # - Report: data/output/report.json
 ```
@@ -109,11 +112,25 @@ cp .env.example .env
 
 **Without a Nebius API key**, the system works normally with OpenCV + YOLO detection only. See [NEBIUS_INTEGRATION.md](NEBIUS_INTEGRATION.md) for details.
 
+### Download YOLO Model
+
+The YOLOv8n model is downloaded automatically on first run. Or download manually:
+
+```bash
+# Automatic download (recommended)
+# Model downloads on first run from ultralytics
+
+# Manual download (optional)
+wget https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt
+```
+
 ### Generate Test Video
 
 ```bash
 python scripts/generate_test_video.py --output data/sample/test_campus.mp4 --duration 10
 ```
+
+**Note**: Test video is not included in the repository to keep it lightweight. Generate it before running analysis.
 
 ### Run CLI Analysis
 

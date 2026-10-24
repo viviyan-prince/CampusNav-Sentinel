@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -6,31 +7,63 @@ dist/
 build/
 .eggs/
 *.egg
+
+# Environment and secrets
 .env
 .env.*
 !.env.example
+
+# Virtual environments
 venv/
 .venv/
+env/
+
+# Model files (download separately)
 *.pt
+*.pth
 *.onnx
 *.engine
 *.weights
+
+# YOLO runs
 runs/
+
+# Data directories (too large for git)
 data/input/*
 data/output/*
 data/uploads/*
+data/sample/*
 !data/input/.gitkeep
 !data/output/.gitkeep
 !data/uploads/.gitkeep
+!data/sample/.gitkeep
+!data/sample/README.md
 !data/README.md
-.claude/
+
+# Video files
 *.mp4
 *.avi
 *.mov
-!data/sample/
+*.mkv
+*.webm
+
+# IDE and tools
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
 *.log
+
+# Testing
 htmlcov/
 .coverage
 .pytest_cache/
 .mypy_cache/
+.tox/
+
+# Temporary files
 tmp/
+temp/

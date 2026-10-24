@@ -104,7 +104,15 @@ gh repo create campusnav-sentinel --public --source=. --push
    export NEBIUS_API_KEY=your_key_here
    ```
 
-### 3. Verify with Real API (REQUIRED for full demo)
+### 3. Generate Test Data (REQUIRED - not in repo)
+
+```bash
+python scripts/generate_test_video.py --output data/sample/test_campus.mp4 --duration 10
+```
+
+**Note**: Video files and YOLO models are excluded from the repository to keep it lightweight (GitHub best practices).
+
+### 4. Verify with Real API (REQUIRED for full demo)
 
 ```bash
 PYTHONPATH=. python verify_nebius.py
@@ -118,7 +126,7 @@ Expected output:
   Action: [actual recommendations]
 ```
 
-### 4. Submit to Hackathon Platform (REQUIRED)
+### 5. Submit to Hackathon Platform (REQUIRED)
 
 1. Go to official Nebius × NVIDIA Hackathon submission page
 2. Fill form with:
